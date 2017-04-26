@@ -1,0 +1,29 @@
+{
+  "name": "manifest-ios",
+  "version": "0.0.1",
+  "description": "Update your iOS mobile application manifest (Version, Bundle idenfifier, ...).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aloisdeniel/node-manifest-ios.git"
+  },
+  "keywords": [
+    "ios",
+    "manifest",
+    "versionning",
+    "tool"
+  ],
+  "author": "Aloïs Deniel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aloisdeniel/node-manifest-ios/issues"
+  },
+  "homepage": "https://github.com/aloisdeniel/node-manifest-ios#readme",
+  "dependencies": {
+    "parse-version": "^0.6.1",
+    "xmlobject": "^0.6.4"
+  }
+}
