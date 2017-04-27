@@ -1,16 +1,14 @@
 var assert = require('assert');
 var path = require('path');
 
-var ios = require('..');
+var iOSManifest = require('..');
 
-var args = { 
-    displayname: "Sample",
-    version: "2.5.6.7",
-    bundleidentifier: "com.test.sample",
-    manifest: path.join(__dirname, "Info.plist"),
-    output: path.join(__dirname, "Info.Updated.plist")
-};
-
-ios.update(args, function(err,xml) {
-    console.log(xml)
-});
+var ios = new iOSManifest();
+ios.load({ file: path.join(__dirname, "Info.plist") }, function(err){
+    ios.version = "2.5.6.7";
+    ios.bundleIdentifier = "com.test.sample";
+    ios.displayName = "Sample";
+    ios.save({ file: path.join(__dirname, "Info.Updated.plist") }, function(err) {
+        console.log("DONE");
+    })
+})

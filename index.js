@@ -25,48 +25,91 @@ function updateDict(args, dict) {
 }
 
 /**
- * Update the manifest of an iOS application.
+ * Load a dict object from a .plist file.
+ * @param {*} args 
+ * @param {*} dict 
  */
-exports.update = function(args, cb) {
+function loadValueFromDict(searchedkey, dict) {
+    var nodes = dict.nodes;
+    for(var i = 0;i < nodes.length;i+=2)  {
+        var child = nodes[i];
+        if(typeof(child) !== "string" && child.name === "key") {
+            var key = child.getText();
+            var value = nodes[i+1];
+            if(key == searchedkey) {
+                return value.getText();
+            }
+        }
+    }
+}
 
-    // Arguments
-    var versionString =  args.version || "1.0.0.0";
-    var displayname = args.displayname;
-    var bundleidentifier = args.bundleidentifier;
-    var isprerelease = args.prerelease || false;
-    var manifest = args.manifest || "Info.plist";
-    var manifestContent = args.manifestContent || fs.readFileSync(manifest, 'utf8');
-    var output = args.output;
+class Manifest{
+    constructor(){
+        this._xml = null;
+    }
 
-    // Parsing
-    parseVersion(versionString, function(err, version) {
-        if (err) return cb(err); 
+    // #region Properties
+
+    get version() { 
+        var v = this.getXmlMetadata("CFBundleShortVersionString"); 
+        v += "." + this.getXmlMetadata("CFBundleVersion"); 
+        return parseVersion(v); 
+    }
+    set version(v) 
+    { 
+        var version = parseVersion(v); 
+        this.updateXmlMetadata({
+            CFBundleShortVersionString: version.major + "." + version.minor + "." + version.patch,
+            CFBundleVersion: version.build + ""
+        });
+    }
+    
+    get bundleIdentifier() { return this.getXmlMetadata("CFBundleIdentifier"); }
+    set bundleIdentifier(v) { this.updateXmlMetadata({ CFBundleIdentifier: v }); }
+
+    get displayName() { return this.getXmlMetadata("CFBundleName"); }
+    set displayName(v) { this.updateXmlMetadata({ CFBundleName: v, CFBundleDisplayName: v }); }
+
+    // #region XML
+
+    updateXmlMetadata(values){
+        var dict = this._xml.firstChild("dict");
+        updateDict(values, dict);
+    }
+
+    getXmlMetadata(key){
+        var dict = this._xml.firstChild("dict");
+        return loadValueFromDict(key, dict);
+    }
+
+    // # region Loading
+
+    load(args, cb) {
+        var manifest = args.file || "Info.plist";
+        var manifestContent = args.content || fs.readFileSync(manifest, 'utf8');
+        var _this = this;
 
         // From XML
         XML.deserialize(manifestContent, function(err, plist) {
             if (err) return cb(err); 
-
-            // Update metadata
-            var dict = plist.firstChild("dict");
-            updateDict({
-                CFBundleName: displayname,
-                CFBundleIdentifier: bundleidentifier,
-                CFBundleShortVersionString: version.major + "." + version.minor + "." + version.patch,
-                CFBundleVersion: version.build + ""
-            }, dict);
-
-            // To XML
-            plist.serialize(function(err,xml){
-                if (err) return cb(err); 
-                var result = {
-                    file: output,
-                    xml: xml
-                 }
-                if(output) {
-                    fs.writeFileSync(output, xml, 'utf8');
-                }
-                cb(null,result);
-            })
+            _this._xml = plist;
+            cb(null,_this);
         });
-    });
+    }
+
+    save(args, cb) {
+        var output = args.file;
+        var _this = this;
+        this._xml.serialize(function(err,xml){
+            if (err) return cb(err); 
+            try {
+                fs.writeFileSync(output, xml, 'utf8');
+                cb(null,_this);
+            } catch (error) {
+                cb(err);
+            }
+        }) 
+    }
 }
+
+module.exports = Manifest;

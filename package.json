@@ -1,6 +1,6 @@
 {
   "name": "manifest-ios",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Update your iOS mobile application manifest (Version, Bundle idenfifier, ...).",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/aloisdeniel/node-manifest-ios#readme",
   "dependencies": {
-    "parse-version": "^0.6.1",
+    "parse-version": "^0.7.0",
     "xmlobject": "^0.6.4"
   }
 }
