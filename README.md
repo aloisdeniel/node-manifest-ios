@@ -14,7 +14,7 @@ $ npm install --save manifest-ios
 var assert = require('assert');
 var path = require('path');
 
-var iOSManifest = require('..');
+var iOSManifest = require('manifest-ios');
 
 var ios = new iOSManifest();
 ios.load({ file: path.join(__dirname, "Info.plist") }, function(err){
