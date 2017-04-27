@@ -102,7 +102,6 @@ class Manifest{
         var manifestContent = args.content || fs.readFileSync(manifest, 'utf8');
         var _this = this;
 
-
         // From XML
         XML.deserialize(manifestContent, function(err, plist) {
             if (err) return cb(err); 
