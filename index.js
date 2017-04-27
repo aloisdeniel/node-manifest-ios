@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 var XML = require('xmlobject');
 var parseVersion = require('parse-version');
 
@@ -46,17 +47,17 @@ function loadValueFromDict(searchedkey, dict) {
 class Manifest{
     constructor(){
         this._xml = null;
+        this._dir = ".";
     }
 
     // #region Properties
 
-    get version() { 
+    get version(){ 
         var v = this.getXmlMetadata("CFBundleShortVersionString"); 
         v += "." + this.getXmlMetadata("CFBundleVersion"); 
         return parseVersion(v); 
     }
-    set version(v) 
-    { 
+    set version(v){ 
         var version = parseVersion(v); 
         this.updateXmlMetadata({
             CFBundleShortVersionString: version.major + "." + version.minor + "." + version.patch,
@@ -70,6 +71,13 @@ class Manifest{
     get displayName() { return this.getXmlMetadata("CFBundleName"); }
     set displayName(v) { this.updateXmlMetadata({ CFBundleName: v, CFBundleDisplayName: v }); }
 
+    get icons(){ 
+        var iconset = this.getXmlMetadata("XSAppIconAssets");
+        var dir = path.join(this._dir,iconset);
+        var files = fs.readdirSync(dir);
+        return files.filter(function(f) { return path.extname(f) === ".png"; });
+    }
+    
     // #region XML
 
     updateXmlMetadata(values){
@@ -85,9 +93,15 @@ class Manifest{
     // # region Loading
 
     load(args, cb) {
-        var manifest = args.file || "Info.plist";
+        var manifest = "Info.plist";
+        if(args.file){
+            manifest = args.file;
+            this._dir = path.dirname(manifest);
+        }
+
         var manifestContent = args.content || fs.readFileSync(manifest, 'utf8');
         var _this = this;
+
 
         // From XML
         XML.deserialize(manifestContent, function(err, plist) {

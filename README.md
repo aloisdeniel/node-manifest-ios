@@ -27,6 +27,11 @@ ios.load({ file: path.join(__dirname, "Info.plist") }, function(err){
 })
 ```
 
+## Other manifests
+
+* [UWP](https://github.com/aloisdeniel/node-manifest-uwp)
+* [Android](https://github.com/aloisdeniel/node-manifest-android)
+
 ## Copyright and license
 
 MIT © [Aloïs Deniel](http://aloisdeniel.github.io)
